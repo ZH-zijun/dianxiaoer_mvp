@@ -39,8 +39,11 @@ jobs:
             kivy/buildozer:latest \
             /bin/sh -c "
               echo '=== Starting Build ==='
-              # 自动确认跳过 'root' 用户安全检查
-              yes | buildozer android debug
+              # 创建一个名为 'builder' 的普通用户并赋予项目目录权限
+              adduser --disabled-password --gecos '' builder
+              chown -R builder:builder /app
+              # 以 'builder' 用户身份运行 Buildozer，彻底避免 root 用户安全提示
+              su builder -c 'buildozer android debug'
             "
 
       # ── 3. 上传 APK 到 Actions 产物 ──
