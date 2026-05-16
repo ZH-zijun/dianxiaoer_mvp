@@ -5,6 +5,12 @@ title = 店小二 - AI 记账助手
 version = 0.0.1
 android.accept_sdk_license = True
 
+# 锁定 Python 版本，避免构建时自动检测导致错误
+requirements = python3==3.11.1,kivy==2.3.0,sounddevice,pycryptodome,websocket-client
+
+# 手动指定 hostpython 为 3.11
+android.hostpython = python3.11
+
 # (str) Package name
 package.name = dianxiaoer
 
