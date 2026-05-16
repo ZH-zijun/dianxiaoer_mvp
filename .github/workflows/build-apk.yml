@@ -1,5 +1,5 @@
 # =============================================================================
-# GitHub Actions — 店小二 APK 自动打包 (终极修改源码版)
+# GitHub Actions — 店小二 APK 自动打包 (修复文件路径版)
 # =============================================================================
 
 name: Build APK (Final Fix)
@@ -61,21 +61,32 @@ jobs:
           python3.11 -m pip install --user buildozer cython
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-          # === 终极修复：欺骗 python-for-android 的版本检查 ===
-          # python-for-android 内部会调用这个函数来获取 hostpython3 的版本
-          # 我们直接修改它，让它不再去探测系统里的 3.14，而是直接返回我们要求的 3.11.1
-          P4A_TOOLS_PATH=$(python3.11 -m pip show python-for-android | grep Location | cut -d ' ' -f 2)/pythonforandroid/toolchain.py
+          # === 战术修正：用 find 命令精准定位要修改的文件 ===
+          # 先找到 buildozer 的安装位置
+          BUILDOZER_LIB=$(python3.11 -c "import buildozer, os; print(os.path.dirname(buildozer.__file__))")
+          echo "Buildozer library is at: $BUILDOZER_LIB"
+          
+          # 从 buildozer 的安装位置开始，寻找 toolchain.py
+          P4A_TOOLS_PATH=$(find $BUILDOZER_LIB -name "toolchain.py" -path "*/pythonforandroid/*" 2>/dev/null | head -1)
           echo "Patching: $P4A_TOOLS_PATH"
 
-          # 找到获取 hostpython 版本的函数并修改
-          # 原逻辑是调用 subprocess 获取系统 python3 的真实版本，我们改成直接返回固定版本号
+          if [ -z "$P4A_TOOLS_PATH" ]; then
+            echo "Error: Could not find python-for-android toolchain.py"
+            exit 1
+          fi
+
+          # 核心步骤：直接修改源码！
+          # 把获取 hostpython 版本的函数改成直接返回我们需要的版本号
           sudo sed -i "s/hostpython_version = .*/hostpython_version = '3.11.1'  # FORCE PATCHED/" $P4A_TOOLS_PATH
-          
           echo "Toolchain patch applied!"
 
-          # 同样处理 prerequisites.py，彻底阻止任何地方去检测系统 python3 版本
-          PREREQ_PATH=$(python3.11 -m pip show python-for-android | grep Location | cut -d ' ' -f 2)/pythonforandroid/prerequisites.py
-          sudo sed -i "s/hostpython3_version = .*/hostpython3_version = '3.11.1'  # FORCE PATCHED/" $PREREQ_PATH
+          # 同样，也找到并修改 prerequisites.py
+          PREREQ_PATH=$(find $BUILDOZER_LIB -name "prerequisites.py" -path "*/pythonforandroid/*" 2>/dev/null | head -1)
+          echo "Patching prerequisites: $PREREQ_PATH"
+          if [ -n "$PREREQ_PATH" ]; then
+            sudo sed -i "s/hostpython3_version = .*/hostpython3_version = '3.11.1'  # FORCE PATCHED/" $PREREQ_PATH
+            echo "Prerequisites patch applied!"
+          fi
 
           echo "All patches applied!"
 
