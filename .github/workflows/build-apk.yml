@@ -33,14 +33,14 @@ jobs:
       # ── 2. 使用 Docker 容器运行 Buildozer ──
       - name: Build APK inside Docker container
         run: |
-          # 使用 Buildozer 官方 Docker 镜像，它内部已是稳定的 Python 3.11 环境
           docker run -i \
             -v ${{ github.workspace }}:/app \
             -w /app \
             kivy/buildozer:latest \
             /bin/sh -c "
               echo '=== Starting Build ==='
-              buildozer android debug
+              # 自动确认跳过 'root' 用户安全检查
+              yes | buildozer android debug
             "
 
       # ── 3. 上传 APK 到 Actions 产物 ──
