@@ -2,6 +2,7 @@
 
 # (str) Title of your application
 title = 店小二 - AI 记账助手
+android.hostpython = /usr/bin/python3.11
 version = 0.0.1
 android.accept_sdk_license = True
 
