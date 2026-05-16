@@ -36,7 +36,7 @@ source.include_exts = py,png,jpg,kv,ttf,jet,so
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3==3.11.1,kivy==2.2.1,pycryptodome,websocket-client
+requirements = python3==3.14.2,kivy==2.3.0,pycryptodome,websocket-client
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
