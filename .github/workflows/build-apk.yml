@@ -1,8 +1,8 @@
 # =============================================================================
-# GitHub Actions — 店小二 APK 自动打包 (强制 Python 3.11 版)
+# GitHub Actions — 店小二 APK 自动打包 (终极环境伪装版)
 # =============================================================================
 
-name: Build APK with Python3.11
+name: Build APK with Python3.11 (Final)
 
 on:
   workflow_dispatch:
@@ -22,7 +22,7 @@ on:
 
 jobs:
   build:
-    name: Build APK with Buildozer (Python 3.11)
+    name: Build APK with Buildozer (Python 3.11 Final)
     runs-on: ubuntu-22.04
 
     steps:
@@ -54,24 +54,32 @@ jobs:
           sudo apt update -qq
           sudo apt install -y -qq python3.11 python3.11-dev python3.11-venv
 
-      # ── 3. 安装 Buildozer 并暴力破解 root 检查 ──
+      # ── 3. 终极环境伪装：强制劫持 python3 命令 ──
+      - name: Force hijack python3 command to 3.11
+        run: |
+          # 核心步骤：创建一个指向 python3.11 的“假” python3，放在前面
+          # 这会让所有脚本里偷偷调用 python3 的地方，实际上都跑去执行 3.11！
+          sudo ln -sf /usr/bin/python3.11 /usr/local/bin/python3
+          /usr/local/bin/python3 --version  # 应该输出 3.11.x
+          
+          # 同时，也把 python3 命令本身替换掉
+          sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
+          sudo update-alternatives --set python3 /usr/bin/python3.11
+          python3 --version  # 双重保险，这里也必须是 3.11.x
+
+      # ── 4. 安装 Buildozer 并绕开 root 检查 ──
       - name: Install Buildozer and disable root check
         run: |
-          # 用 python3.11 安装 buildozer
-          python3.11 -m pip install --user buildozer cython
+          # 现在 python3 就是 3.11 了，直接用
+          python3 -m pip install --user buildozer cython
           
-          # 找到 buildozer 的安装路径
-          BUILDOZER_PATH=$(python3.11 -c "import buildozer, os; print(os.path.dirname(buildozer.__file__))")
-          echo "Buildozer is installed at: $BUILDOZER_PATH"
-          
-          # 强制注释掉 root 用户检查！
-          # 这会直接修改源码，让 buildozer 不再问 "Are you sure you want to continue?"
+          # 暴力修复：注释掉 root 检查
+          BUILDOZER_PATH=$(python3 -c "import buildozer, os; print(os.path.dirname(buildozer.__file__))")
           sed -i 's/self.check_root()/# self.check_root() # forcefully disabled/' $BUILDOZER_PATH/__init__.py
-          echo "Root check disabled!"
           
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      # ── 4. 缓存 Buildozer 的 Android SDK/NDK ──
+      # ── 5. 缓存 Buildozer 的 Android SDK/NDK ──
       - name: Cache buildozer
         uses: actions/cache@v4
         with:
@@ -82,7 +90,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildozer-
 
-      # ── 5. 运行 Buildozer 打包 ──
+      # ── 6. 运行 Buildozer 打包 ──
       - name: Build APK with buildozer
         run: |
           export CI=true
@@ -92,10 +100,10 @@ jobs:
             echo "回退到 debug 构建"
             BUILD_TYPE="debug"
           fi
-          # 直接调用 buildozer，它现在不会再问 root 权限了
-          python3.11 -m buildozer android $BUILD_TYPE
+          # 现在，整个环境里的 python3 都是 3.11 了，直接调用 buildozer
+          buildozer android $BUILD_TYPE
 
-      # ── 6. 上传 APK 到 Actions 产物 ──
+      # ── 7. 上传 APK 到 Actions 产物 ──
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
