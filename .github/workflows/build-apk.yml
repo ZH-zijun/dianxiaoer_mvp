@@ -1,15 +1,8 @@
 # =============================================================================
-<<<<<<< HEAD
-# GitHub Actions — 店小二 APK 自动打包 (指定 hostpython 版)
+# GitHub Actions — 店小二 APK 自动打包 (Final)
 # =============================================================================
 
 name: Build APK (Final)
-=======
-# GitHub Actions — 店小二 APK 自动打包 (伪装 Python 版本版)
-# =============================================================================
-
-name: Build APK (Final Fix)
->>>>>>> a7058db05ec0cf4431cff2682aa1eca2a6aa0c5b
 
 on:
   workflow_dispatch:
@@ -36,10 +29,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-<<<<<<< HEAD
-=======
-      # ── 2. 安装系统依赖和 Python 3.11 ──
->>>>>>> a7058db05ec0cf4431cff2682aa1eca2a6aa0c5b
       - name: Install system dependencies and Python 3.11
         run: |
           sudo apt update -qq
@@ -62,7 +51,6 @@ jobs:
           sudo apt update -qq
           sudo apt install -y -qq python3.11 python3.11-dev python3.11-venv
 
-<<<<<<< HEAD
       - name: Force python3 to 3.11
         run: |
           # 直接把 /usr/bin/python3 替换成 3.11
@@ -70,36 +58,11 @@ jobs:
           sudo ln -s /usr/bin/python3.11 /usr/bin/python3
           python3 --version
 
-=======
-      # ── 3. 创建伪装 python3，骗过版本检查 ──
-      - name: Create fake python3 to bypass version check
-        run: |
-          # 创建一个假的 python3 脚本，无论谁问，都说自己是 3.11.1
-          sudo tee /usr/local/bin/python3 > /dev/null << 'EOF'
-          #!/bin/bash
-          if [ "$1" = "--version" ]; then
-            echo "Python 3.11.1"
-          elif [ "$1" = "-c" ] && [[ "$2" == *"sys.version"* ]]; then
-            echo "3.11.1 (main, Jan 1 2024, 00:00:00) [GCC 11.4.0]"
-          else
-            /usr/bin/python3.11 "$@"
-          fi
-          EOF
-          sudo chmod +x /usr/local/bin/python3
-          /usr/local/bin/python3 --version
-          /usr/local/bin/python3 -c "import sys; print(sys.version)"
-
-      # ── 4. 安装 Buildozer ──
->>>>>>> a7058db05ec0cf4431cff2682aa1eca2a6aa0c5b
       - name: Install Buildozer
         run: |
           python3.11 -m pip install --user buildozer cython
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-<<<<<<< HEAD
-=======
-      # ── 5. 缓存 Buildozer 的 Android SDK/NDK ──
->>>>>>> a7058db05ec0cf4431cff2682aa1eca2a6aa0c5b
       - name: Cache buildozer
         uses: actions/cache@v4
         with:
@@ -110,10 +73,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildozer-
 
-<<<<<<< HEAD
-=======
-      # ── 6. 运行 Buildozer 打包 ──
->>>>>>> a7058db05ec0cf4431cff2682aa1eca2a6aa0c5b
       - name: Build APK with buildozer
         run: |
           export CI=true
