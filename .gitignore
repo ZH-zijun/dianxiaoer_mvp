@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+# Python compiled extensions (NOT the libs/ native .so files)
+*.so
+!libs/**/*.so
+*.egg-info/
+dist/
+*.egg
+
+# Virtual environment
+.venv/
+venv/
+
+# Buildozer build artifacts
+build/
+bin/
+.buildozer/
+*.apk
+*.aab
+
+# IDE / editor
+.idea/
+*.swp
+*.swo
+*~
+
+# WorkBuddy
+.workbuddy/
+
+# SQLite database (created at runtime)
+*.db
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project docs (not needed for build)
+*.md

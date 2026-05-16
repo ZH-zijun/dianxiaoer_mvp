@@ -1,0 +1,111 @@
+# =============================================================================
+# GitHub Actions — 店小二 APK 自动打包
+# =============================================================================
+# 使用方式：
+#   1. 将代码推送到 GitHub 仓库
+#   2. 进入仓库 Actions 页面 → 选择 "Build APK" → 点击 "Run workflow"
+#   3. 等待约 30-60 分钟（首次需下载 Android SDK/NDK）
+#   4. 构建完成后在 Actions 运行结果页面下载 APK 附件
+# =============================================================================
+
+name: Build APK
+
+on:
+  workflow_dispatch:          # 手动触发
+    inputs:
+      build_type:
+        description: '构建类型'
+        required: true
+        default: 'debug'
+        type: choice
+        options:
+          - debug
+          - release
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  build:
+    name: Build APK with Buildozer
+    runs-on: ubuntu-22.04      # 使用 Ubuntu 22.04，兼容性最佳
+
+    steps:
+      # ── 1. 检出代码 ──
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ── 2. 安装系统依赖 ──
+      - name: Install system dependencies
+        run: |
+          sudo apt update -qq
+          sudo apt install -y -qq \
+            python3-pip \
+            openjdk-17-jdk \
+            zip \
+            unzip \
+            autoconf \
+            libtool \
+            pkg-config \
+            zlib1g-dev \
+            libncurses5-dev \
+            libncursesw5-dev \
+            libtinfo5 \
+            cmake \
+            libffi-dev \
+            libssl-dev
+          # 验证 Java 安装
+          java -version
+
+      # ── 3. 安装 Python 3.11（项目要求） ──
+      - name: Install Python 3.11
+        run: |
+          sudo add-apt-repository -y ppa:deadsnakes/ppa
+          sudo apt update -qq
+          sudo apt install -y -qq python3.11 python3.11-dev python3.11-venv
+          sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
+          python3 --version
+
+      # ── 4. 安装 buildozer ──
+      - name: Install Buildozer
+        run: |
+          pip3 install --user buildozer
+          # 注意：buildozer 依赖 cython，一起安装
+          pip3 install --user cython
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      # ── 5. 缓存 buildozer 的 Android SDK/NDK ──
+      #     首次构建约 1.5GB，缓存后后续构建大幅提速
+      - name: Cache buildozer
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.buildozer
+            !~/.buildozer/android/platform
+          key: ${{ runner.os }}-buildozer-${{ hashFiles('buildozer.spec') }}
+          restore-keys: |
+            ${{ runner.os }}-buildozer-
+
+      # ── 6. 运行 buildozer 打包 ──
+      - name: Build APK with buildozer
+        run: |
+          # GitHub Actions 为非交互式环境，禁用终端颜色
+          export CI=true
+          export BUILD_TYPE=${{ github.event.inputs.build_type || 'debug' }}
+          if [ "$BUILD_TYPE" = "release" ]; then
+            echo "⚠️  Release build 需要配置签名密钥，当前暂不支持"
+            echo "回退到 debug 构建"
+            BUILD_TYPE="debug"
+          fi
+          # 执行打包
+          buildozer android $BUILD_TYPE
+
+      # ── 7. 上传 APK 到 Actions 产物 ──
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dianxiaoer-apk
+          path: bin/*.apk
+          if-no-files-found: error
+          retention-days: 7
