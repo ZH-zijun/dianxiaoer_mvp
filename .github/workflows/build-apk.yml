@@ -1,8 +1,8 @@
 # =============================================================================
-# GitHub Actions — 店小二 APK 自动打包 (终极环境伪装版)
+# GitHub Actions — 店小二 APK 自动打包 (终极修改源码版)
 # =============================================================================
 
-name: Build APK with Python3.11 (Final)
+name: Build APK (Final Fix)
 
 on:
   workflow_dispatch:
@@ -22,7 +22,7 @@ on:
 
 jobs:
   build:
-    name: Build APK with Buildozer (Python 3.11 Final)
+    name: Build APK with Buildozer (Final)
     runs-on: ubuntu-22.04
 
     steps:
@@ -54,32 +54,32 @@ jobs:
           sudo apt update -qq
           sudo apt install -y -qq python3.11 python3.11-dev python3.11-venv
 
-      # ── 3. 终极环境伪装：强制劫持 python3 命令 ──
-      - name: Force hijack python3 command to 3.11
+      # ── 3. 安装 Buildozer 并执行终极源码修改 ──
+      - name: Install Buildozer and apply final source fix
         run: |
-          # 核心步骤：创建一个指向 python3.11 的“假” python3，放在前面
-          # 这会让所有脚本里偷偷调用 python3 的地方，实际上都跑去执行 3.11！
-          sudo ln -sf /usr/bin/python3.11 /usr/local/bin/python3
-          /usr/local/bin/python3 --version  # 应该输出 3.11.x
-          
-          # 同时，也把 python3 命令本身替换掉
-          sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
-          sudo update-alternatives --set python3 /usr/bin/python3.11
-          python3 --version  # 双重保险，这里也必须是 3.11.x
-
-      # ── 4. 安装 Buildozer 并绕开 root 检查 ──
-      - name: Install Buildozer and disable root check
-        run: |
-          # 现在 python3 就是 3.11 了，直接用
-          python3 -m pip install --user buildozer cython
-          
-          # 暴力修复：注释掉 root 检查
-          BUILDOZER_PATH=$(python3 -c "import buildozer, os; print(os.path.dirname(buildozer.__file__))")
-          sed -i 's/self.check_root()/# self.check_root() # forcefully disabled/' $BUILDOZER_PATH/__init__.py
-          
+          # 使用 python3.11 来安装 buildozer 和 cython
+          python3.11 -m pip install --user buildozer cython
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      # ── 5. 缓存 Buildozer 的 Android SDK/NDK ──
+          # === 终极修复：欺骗 python-for-android 的版本检查 ===
+          # python-for-android 内部会调用这个函数来获取 hostpython3 的版本
+          # 我们直接修改它，让它不再去探测系统里的 3.14，而是直接返回我们要求的 3.11.1
+          P4A_TOOLS_PATH=$(python3.11 -m pip show python-for-android | grep Location | cut -d ' ' -f 2)/pythonforandroid/toolchain.py
+          echo "Patching: $P4A_TOOLS_PATH"
+
+          # 找到获取 hostpython 版本的函数并修改
+          # 原逻辑是调用 subprocess 获取系统 python3 的真实版本，我们改成直接返回固定版本号
+          sudo sed -i "s/hostpython_version = .*/hostpython_version = '3.11.1'  # FORCE PATCHED/" $P4A_TOOLS_PATH
+          
+          echo "Toolchain patch applied!"
+
+          # 同样处理 prerequisites.py，彻底阻止任何地方去检测系统 python3 版本
+          PREREQ_PATH=$(python3.11 -m pip show python-for-android | grep Location | cut -d ' ' -f 2)/pythonforandroid/prerequisites.py
+          sudo sed -i "s/hostpython3_version = .*/hostpython3_version = '3.11.1'  # FORCE PATCHED/" $PREREQ_PATH
+
+          echo "All patches applied!"
+
+      # ── 4. 缓存 Buildozer 的 Android SDK/NDK ──
       - name: Cache buildozer
         uses: actions/cache@v4
         with:
@@ -90,7 +90,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildozer-
 
-      # ── 6. 运行 Buildozer 打包 ──
+      # ── 5. 运行 Buildozer 打包 ──
       - name: Build APK with buildozer
         run: |
           export CI=true
@@ -100,10 +100,10 @@ jobs:
             echo "回退到 debug 构建"
             BUILD_TYPE="debug"
           fi
-          # 现在，整个环境里的 python3 都是 3.11 了，直接调用 buildozer
-          buildozer android $BUILD_TYPE
+          # 使用 python3.11 来运行 buildozer
+          python3.11 -m buildozer android $BUILD_TYPE
 
-      # ── 7. 上传 APK 到 Actions 产物 ──
+      # ── 6. 上传 APK 到 Actions 产物 ──
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
