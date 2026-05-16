@@ -41,7 +41,6 @@ source.include_dirs = libs,assets
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3==3.11.1,kivy==2.3.0,sounddevice,pycryptodome,websocket-client
 
 # (str) Supported orientation (landscape, sensorLandscape, portrait or all)
 orientation = portrait
