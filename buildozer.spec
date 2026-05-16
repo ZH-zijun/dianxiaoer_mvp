@@ -3,6 +3,7 @@
 # (str) Title of your application
 title = 店小二 - AI 记账助手
 version = 0.0.1
+android.accept_sdk_license = True
 
 # (str) Package name
 package.name = dianxiaoer
