@@ -81,7 +81,7 @@ class DianxiaoerApp(App):
         self.sm = ScreenManager(transition=SlideTransition(duration=ANIM_DURATION))
 
         # 延迟导入 UI 模块（避免循环依赖，且需要数据库先初始化）
-        Clock.schedule_once(lambda dt: self._init_screens(), 0.1)
+        Clock.schedule_once(lambda dt: self._init_screens(dt), 0.1)
 
         return self.sm
 
