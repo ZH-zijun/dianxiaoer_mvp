@@ -14,7 +14,7 @@ package.domain = com.laowu
 source.dir = .
 
 # (list) Source files to include (let empty to include all the files)
-source.include_exts = py,png,jpg,kv,ttf,jet,so
+source.include_exts = py,png,jpg,kv,ttf,jet,so,atlas
 
 # (list) List of inclusions using pattern matching
 #source.include_patterns = assets/*,images/*.png
@@ -88,7 +88,7 @@ fullscreen = 0
 #icon.adaptive_background.filename = %(source.dir)s/data/icon_bg.png
 
 # (list) Permissions
-android.permissions = RECORD_AUDIO, WRITE_EXTERNAL_STORAGE
+android.permissions = RECORD_AUDIO, WRITE_EXTERNAL_STORAGE,INTERNET
 
 # (int) Target Android API, should be as high as possible.
 android.api = 33
