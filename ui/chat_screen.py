@@ -437,9 +437,9 @@ class ChatScreen(Screen):
             on_record_release=self._on_record_release,
         )
 
-        # ── 键盘自适应：使用 softinput_mode ──
+        # ── 键盘自适应（全局设置已在 main.py on_start() 生效，此处为兼容保留）──
         from kivy.core.window import Window
-        Window.softinput_mode = 'resize'
+        Window.softinput_mode = 'below_target'
 
         # ── 组装 ──
         self._root.add_widget(self._status_banner)

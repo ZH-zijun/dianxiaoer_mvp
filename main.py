@@ -16,6 +16,7 @@ import os
 import sys
 
 os.environ['SDL_HINT_ANDROID_SHOW_IME_WITH_KEYBOARD'] = '1'
+
 # 将项目根目录加入 sys.path，确保所有模块可导入
 _PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 if _PROJECT_ROOT not in sys.path:
@@ -218,7 +219,8 @@ class DianxiaoerApp(App):
 
     def on_start(self):
         """App 启动后"""
-        Window.softinput_mode = 'resize'
+        # 'below_target' 而非 'resize'（Kivy 文档: resize 在 Android SDL2 上无效）
+        Window.softinput_mode = 'below_target'
         Window.bind(on_keyboard=self._on_android_back)
 
     def _on_android_back(self, window, key, scancode, codepoint, modifier):

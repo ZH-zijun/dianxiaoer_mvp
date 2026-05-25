@@ -84,8 +84,6 @@ class LoginScreen(Screen):
             size_hint_y=None,
             height=INPUT_HEIGHT,
             multiline=False,
-            focus=True,
-            # 圆角效果通过 canvas 间接实现
         )
         # 输入框圆角边框
         from kivy.graphics import Color, Rectangle, Line
@@ -363,4 +361,5 @@ class LoginScreen(Screen):
         self._password_input.text = ''
         self._status_label.text = ''
         self._login_btn.disabled = False
-        self._password_input.focus = True
+        # 延迟设置 focus，等窗口完全初始化后再弹出键盘
+        Clock.schedule_once(lambda dt: setattr(self._password_input, 'focus', True), 0.5)
