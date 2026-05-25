@@ -15,6 +15,7 @@ main.py — 店小二 App 主入口
 import os
 import sys
 
+os.environ['SDL_HINT_ANDROID_SHOW_IME_WITH_KEYBOARD'] = '1'
 # 将项目根目录加入 sys.path，确保所有模块可导入
 _PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 if _PROJECT_ROOT not in sys.path:
