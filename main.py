@@ -14,7 +14,10 @@ main.py — 店小二 App 主入口
 
 import os
 import sys
-
+# === 新增：注册中文字体（解决界面显示方块字） ===
+from kivy.core.text import LabelBase
+LabelBase.register(name='Roboto', fn_regular='/system/fonts/DroidSansFallback.ttf')
+# ===================================================
 # 将项目根目录加入 sys.path，确保所有模块可导入
 _PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 if _PROJECT_ROOT not in sys.path:
