@@ -14,10 +14,7 @@ main.py — 店小二 App 主入口
 
 import os
 import sys
-# === 新增：注册中文字体（解决界面显示方块字） ===
-from kivy.core.text import LabelBase
-LabelBase.register(name='Roboto', fn_regular='/system/fonts/DroidSansFallback.ttf')
-# ===================================================
+
 # 将项目根目录加入 sys.path，确保所有模块可导入
 _PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 if _PROJECT_ROOT not in sys.path:
@@ -53,6 +50,42 @@ Config.set('kivy', 'keyboard_layout', 'qwerty')
 Config.set('kivy', 'log_level', 'warning')
 
 from kivy.base import ExceptionManager, ExceptionHandler
+
+# ══════════════════════════════════════════════
+# 注册中文字体（解决界面显示方块字）
+# 尝试顺序：1. 应用内 bundled 字体  2. 系统字体
+# ══════════════════════════════════════════════
+_FONT_REGISTERED = False
+try:
+    from kivy.core.text import LabelBase
+    # 首选：应用内 bundled 字体
+    _bundled_font = os.path.join(_PROJECT_ROOT, 'assets', 'fonts', 'NotoSansSC-VF.ttf')
+    if os.path.exists(_bundled_font):
+        LabelBase.register(name='Roboto', fn_regular=_bundled_font)
+        _FONT_REGISTERED = True
+    else:
+        # 备选：常见 Android 系统字体路径
+        _font_candidates = [
+            '/system/fonts/NotoSansSC-Regular.otf',
+            '/system/fonts/DroidSansFallback.ttf',
+            '/system/fonts/NotoSansCJK-Regular.ttc',
+        ]
+        for _font_path in _font_candidates:
+            if os.path.exists(_font_path):
+                LabelBase.register(name='Roboto', fn_regular=_font_path)
+                _FONT_REGISTERED = True
+                break
+    if not _FONT_REGISTERED:
+        print('[字体] 未找到中文字体，文字可能显示为方块')
+except Exception as _e:
+    print(f'[字体] 注册失败: {_e}')
+# ===================================================
+
+
+# ══════════════════════════════════════════════
+# 导入 UI 常量（必须在 App 类定义之前，供 build() 使用）
+# ══════════════════════════════════════════════
+from ui import ANIM_DURATION
 
 
 class AppExceptionHandler(ExceptionHandler):
@@ -204,5 +237,4 @@ class DianxiaoerApp(App):
 # ══════════════════════════════════════════════
 
 if __name__ == '__main__':
-    from ui import ANIM_DURATION
     DianxiaoerApp().run()

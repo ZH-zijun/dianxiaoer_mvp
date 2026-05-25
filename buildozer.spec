@@ -14,7 +14,7 @@ package.domain = com.laowu
 source.dir = .
 
 # (list) Source files to include (let empty to include all the files)
-source.include_exts = py,png,jpg,kv,ttf,jet,so,atlas
+source.include_exts = py,png,jpg,kv,ttf,otf,jet,so,atlas
 
 # (list) List of inclusions using pattern matching
 #source.include_patterns = assets/*,images/*.png
