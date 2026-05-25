@@ -217,6 +217,7 @@ class DianxiaoerApp(App):
 
     def on_start(self):
         """App 启动后"""
+        Window.softinput_mode = 'resize'
         Window.bind(on_keyboard=self._on_android_back)
 
     def _on_android_back(self, window, key, scancode, codepoint, modifier):
