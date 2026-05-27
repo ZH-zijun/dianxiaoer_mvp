@@ -136,6 +136,7 @@ class LoginScreen(Screen):
                 radius=[BUBBLE_RADIUS,],
             )
         login_btn.bind(pos=self._update_btn_bg, size=self._update_btn_bg)
+        self._login_btn = login_btn
 
         # ── 底部版本 ──
         ver_label = Label(
