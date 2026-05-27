@@ -42,7 +42,8 @@ Config.set('graphics', 'height', '720')
 Config.set('graphics', 'resizable', True)
 Config.set('graphics', 'minimum_width', '360')
 Config.set('graphics', 'minimum_height', '640')
-Config.set('graphics', 'background_color', '0.102, 0.102, 0.180, 1')
+# 窗口背景色（Window.clearcolor 在 Android SDL2 上可靠，Config.set 不生效）
+Window.clearcolor = (0.102, 0.102, 0.180, 1)
 
 # 输入配置
 Config.set('kivy', 'keyboard_mode', 'system')  # 使用系统键盘
