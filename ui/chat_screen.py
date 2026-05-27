@@ -377,7 +377,7 @@ class ChatScreen(Screen):
 
         # 设置按钮（右上角）
         settings_btn = Button(
-            text='\u2699',  # 齿轮符号
+            text='设置',  # 齿轮符号 \u2699 在中文字体中不可见，改为中文
             font_size=FONT_CHAT + 4,
             color=TEXT_SECONDARY,
             background_color=(0, 0, 0, 0),  # 透明背景
